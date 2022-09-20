@@ -5,6 +5,8 @@ const PORT = process.env.PORT || 3001;
 const routes = require("./src/routes/index");
 const { application } = require("express");
 
+const { conn } = require("./db");
+
 const server = express();
 
 server.use(morgan("dev"));
@@ -28,6 +30,8 @@ server.use((err, req, res, next) => {
   res.status(status).send(message);
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening at ${PORT}`);
+conn.sync({ force: true }).then(() => {
+  server.listen(PORT, () => {
+    console.log(`Server listening at ${PORT}`);
+  });
 });

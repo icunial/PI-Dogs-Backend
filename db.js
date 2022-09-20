@@ -7,6 +7,8 @@ const sequelize = new Sequelize(
   { logging: false, native: false }
 );
 
+const { Dog } = sequelize.models;
+
 module.exports = {
   ...sequelize.models,
   conn: sequelize,

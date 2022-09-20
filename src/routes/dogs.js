@@ -63,6 +63,16 @@ router.get("/", (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {});
+router.post("/", (req, res) => {
+  const dog = req.body;
+
+  if (!dog.name) return res.status(400).json("Name parameter is missing");
+  if (!dog.min_height)
+    return res.status(400).json("Height parameter is missing");
+  if (!dog.min_weight)
+    return res.status(400).json("Weight parameter is missing");
+  if (!dog.min_life_span)
+    return res.status(400).json("Life Span parameter is missing");
+});
 
 module.exports = router;
