@@ -54,6 +54,10 @@ router.get("/", (req, res) => {
     const fromDb = dogController.findByTemperamentDb(temperament);
     Promise.all([fromApi, fromDb])
       .then((results) => {
+        if (!results.length)
+          res
+            .status(404)
+            .json(`Dogs with temperament ${temperament} not found!`);
         res.status(200).json(results[0].concat(results[1]));
       })
       .catch((error) => {
