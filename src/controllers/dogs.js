@@ -1,4 +1,7 @@
 const axios = require("axios");
+const { Dog, Temperament } = require("../db");
+const { Op } = require("sequelize");
+const utils = require("../utils/index");
 
 const convertTemperamentsToArray = (temperaments) => {
   const temperamentsArray = [];
@@ -120,9 +123,182 @@ const findByTemperamentApi = (temp) => {
   });
 };
 
+const findDogByIdDb = (id) => {
+  return new Promise((resolve, reject) => {
+    Dog.findByPk(id, {
+      attributes: ["id", "name", "image", "weight", "height", "life_span"],
+      include: Temperament,
+    })
+      .then((dbResult) => {
+        const result = [
+          {
+            id: dbResult.id,
+            name: dbResult.name,
+            image: dbResult.image,
+            temperament: dbResult.temperaments.map((t) => t.name),
+            weight: dbResult.weight,
+            height: dbResult.height,
+            life_span: dbResult.life_span,
+          },
+        ];
+        resolve(result);
+      })
+      .catch(() => {
+        reject(new Error("Error finding a dog by its ID in DB"));
+      });
+  });
+};
+
+const findByNameDb = (name) => {
+  return new Promise((resolve, reject) => {
+    const results = [];
+
+    Dog.findAll({
+      attributes: ["id", "name", "image", "weight"],
+      include: Temperament,
+      where: {
+        name: {
+          [Op.iLike]: `%${name}%`,
+        },
+      },
+    })
+      .then((dbResults) => {
+        dbResults.forEach((r) => {
+          results.push({
+            id: r.id,
+            name: r.name,
+            image: r.image,
+            temperament: r.temperaments.map((t) => t.name),
+            weight: r.weight,
+          });
+        });
+
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to get a dog by its name from DB"));
+      });
+  });
+};
+
+const findByTemperamentDb = (temp) => {
+  return new Promise((resolve, reject) => {
+    let results = [];
+
+    Dog.findAll({
+      attributes: ["id", "name", "image", "weight"],
+      include: Temperament,
+    })
+      .then((dbResults) => {
+        dbResults.forEach((r) => {
+          results.push({
+            id: r.id,
+            name: r.name,
+            image: r.image,
+            temperament: r.temperaments.map((t) => t.name),
+            weight: r.weight,
+          });
+        });
+
+        results = results.filter((r) => {
+          return r.temperament.includes(temp);
+        });
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to get all dogs from DB"));
+      });
+  });
+};
+
+const getAllDb = () => {
+  return new Promise((resolve, reject) => {
+    const results = [];
+
+    Dog.findAll({
+      attributes: ["id", "name", "image", "weight"],
+      include: Temperament,
+    })
+      .then((dbResults) => {
+        dbResults.forEach((r) => {
+          results.push({
+            id: r.id,
+            name: r.name,
+            image: r.image,
+            temperament: r.temperaments.map((t) => t.name),
+            weight: r.weight,
+          });
+        });
+
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to get all dogs from DB"));
+      });
+  });
+};
+
+const orderFromAtoZ = () => {
+  return new Promise((resolve, reject) => {
+    const dogsFromApi = getAllApi();
+    const dogsFromDb = getAllDb();
+
+    Promise.all([dogsFromApi, dogsFromDb])
+      .then((resultsFromPromises) => {
+        let results = [...resultsFromPromises[0], ...resultsFromPromises[1]];
+        console.log(results);
+
+        results = results.sort((a, b) => {
+          if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+          if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+          return 0;
+        });
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to order from A to Z"));
+      });
+  });
+};
+
+const orderFromZtoA = () => {
+  return new Promise((resolve, reject) => {
+    const dogsFromApi = getAllApi();
+    const dogsFromDb = getAllDb();
+
+    Promise.all([dogsFromApi, dogsFromDb])
+      .then((resultsFromPromises) => {
+        let results = [...resultsFromPromises[0], ...resultsFromPromises[1]];
+        console.log(results);
+
+        results = results.sort((a, b) => {
+          if (a.name.toLowerCase() < b.name.toLowerCase()) return 1;
+          if (a.name.toLowerCase() > b.name.toLowerCase()) return -1;
+          return 0;
+        });
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to order from A to Z"));
+      });
+  });
+};
+
+const orderDogsLessWeight = () => {
+  const fromApi = utils.getAllApiConvertWeight();
+  const fromDb = utils.getAllDbConvertWeight();
+};
+
 module.exports = {
   getAllApi,
   findDogByIdApi,
   findByNameApi,
   findByTemperamentApi,
+  findDogByIdDb,
+  findByNameDb,
+  findByTemperamentDb,
+  getAllDb,
+  orderFromAtoZ,
+  orderFromZtoA,
+  orderDogsLessWeight,
 };

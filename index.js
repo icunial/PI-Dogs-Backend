@@ -5,10 +5,11 @@ const PORT = process.env.PORT || 3001;
 const routes = require("./src/routes/index");
 const { application } = require("express");
 
-const { conn } = require("./db");
+const { conn } = require("./src/db.js");
 
 const server = express();
 
+server.use(bodyParser.json());
 server.use(morgan("dev"));
 server.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -30,7 +31,7 @@ server.use((err, req, res, next) => {
   res.status(status).send(message);
 });
 
-conn.sync({ force: true }).then(() => {
+conn.sync({}).then(() => {
   server.listen(PORT, () => {
     console.log(`Server listening at ${PORT}`);
   });
