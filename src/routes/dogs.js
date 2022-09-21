@@ -16,7 +16,7 @@ router.get("/:id", (req, res) => {
       if (!result.length) {
         return res.status(404).json(`Dog with ID: ${id} not found!`);
       }
-      res.status(200).json(error.message);
+      res.status(200).json(result);
     });
   } else {
     dogController
@@ -170,13 +170,13 @@ router.get("/filter/:opt", (req, res) => {
     results = dogController.orderFromZtoA();
   }
 
-  /*  if (opt === "more") {
-    results = await dogController.orderDogsMoreWeight();
+  if (opt === "more") {
+    results = dogController.orderDogsMoreWeight();
   }
 
   if (opt === "less") {
-    results = await dogController.orderDogsLessWeight();
-  } */
+    results = dogController.orderDogsLessWeight();
+  }
 
   results
     .then((r) => {
@@ -184,6 +184,33 @@ router.get("/filter/:opt", (req, res) => {
     })
     .catch((error) => {
       res.status(400).json(error);
+    });
+});
+
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+
+  dogController
+    .deleteDogFromDbById(id)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      res.status(400).json(error.message);
+    });
+});
+
+router.put("/:id", (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  dogController
+    .updateDogFromDb(id, name)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      res.status(400).json(error.message);
     });
 });
 

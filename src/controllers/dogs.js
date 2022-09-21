@@ -285,8 +285,69 @@ const orderFromZtoA = () => {
 };
 
 const orderDogsLessWeight = () => {
-  const fromApi = utils.getAllApiConvertWeight();
-  const fromDb = utils.getAllDbConvertWeight();
+  return new Promise((resolve, reject) => {
+    const dogsFromApi = utils.getAllApiConvertWeight();
+    const dogsFromDb = utils.getAllDbConvertWeight();
+
+    Promise.all([dogsFromApi, dogsFromDb])
+      .then((resultsFromPromises) => {
+        let results = [...resultsFromPromises[0], ...resultsFromPromises[1]];
+        console.log(results);
+
+        results = results.sort((a, b) => {
+          return a.weightConvert - b.weightConvert;
+        });
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to order from A to Z"));
+      });
+  });
+};
+
+const orderDogsMoreWeight = () => {
+  return new Promise((resolve, reject) => {
+    const dogsFromApi = utils.getAllApiConvertWeight();
+    const dogsFromDb = utils.getAllDbConvertWeight();
+
+    Promise.all([dogsFromApi, dogsFromDb])
+      .then((resultsFromPromises) => {
+        let results = [...resultsFromPromises[0], ...resultsFromPromises[1]];
+        console.log(results);
+
+        results = results.sort((a, b) => {
+          return b.weightConvert - a.weightConvert;
+        });
+        resolve(results);
+      })
+      .catch(() => {
+        reject(new Error("Error trying to order from A to Z"));
+      });
+  });
+};
+
+const deleteDogFromDbById = (id) => {
+  return new Promise((resolve, reject) => {
+    Dog.destroy({
+      where: {
+        id,
+      },
+    })
+      .then((result) => {
+        resolve(result);
+      })
+      .catch(() => {
+        reject(new Error("Error deleting a dog by its ID in DB"));
+      });
+  });
+};
+
+const updateDogFromDb = (id, name) => {
+  return new Promise((resolve, reject) => {
+    Dog.update({ name }, { where: { id } })
+      .then((result) => resolve(`Dog with ID: ${id} updated successfully!`))
+      .catch(() => reject(new Error("Error updating a dog!")));
+  });
 };
 
 module.exports = {
@@ -301,4 +362,7 @@ module.exports = {
   orderFromAtoZ,
   orderFromZtoA,
   orderDogsLessWeight,
+  orderDogsMoreWeight,
+  deleteDogFromDbById,
+  updateDogFromDb,
 };

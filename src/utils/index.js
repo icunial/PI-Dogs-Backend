@@ -1,6 +1,12 @@
 const axios = require("axios");
 const { Dog, Temperament } = require("../db");
 
+const convertTemperamentsToArray = (temperaments) => {
+  const temperamentsArray = [];
+  temperaments.split(", ").forEach((i) => temperamentsArray.push(i));
+  return temperamentsArray;
+};
+
 const getAllApiConvertWeight = () => {
   return new Promise((resolve, reject) => {
     const results = [];
